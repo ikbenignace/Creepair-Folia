@@ -3,6 +3,7 @@ main: im.wma.dev.creepair.Creepair
 version: ${version}
 website: http://wma.im
 api-version: 1.20 # Because of this Creepair is not compatible with verisons lower than 1.14
+folia-supported: true
 softdepend: [WorldGuard]
 commands:
   creepair:

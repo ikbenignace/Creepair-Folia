@@ -10,8 +10,8 @@
    </properties>
    <repositories>
         <repository>
-            <id>spigot</id>
-            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
          <repository>
             <id>sk89q-repo</id>
@@ -20,8 +20,8 @@
    </repositories>
    <dependencies>
       <dependency>
-         <groupId>org.spigotmc</groupId>
-         <artifactId>spigot-api</artifactId>
+         <groupId>dev.folia</groupId>
+         <artifactId>folia-api</artifactId>
          <version>1.21-R0.1-SNAPSHOT</version>
          <scope>provided</scope>
       </dependency>

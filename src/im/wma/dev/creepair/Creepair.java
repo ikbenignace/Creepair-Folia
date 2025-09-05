@@ -51,7 +51,7 @@ public class Creepair extends JavaPlugin implements Listener {
         naturalTags.addAll(getTagList(this.getConfig().getStringList("natural_tags")));
 
         this.helper = new RepairHelper();
-        this.getServer().getScheduler().scheduleSyncRepeatingTask(this, this.helper, 10, 10);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, scheduledTask -> this.helper.run(), 10, 10);
 
         this.getServer().getPluginManager().registerEvents(this, this);
         // Anonymous implementation of "/creepair" root command.
@@ -324,19 +324,21 @@ public class Creepair extends JavaPlugin implements Listener {
 
                 if (blocks.get(0) != null) {
                     CreepairBlock block = blocks.get(0);
-
-                    // Don't destroy player repairs.
-                    if (block.block.getLocation().getBlock().getType() != Material.AIR) {
-                        blocks.remove(0);
-                        continue;
-                    }
-
-                    block.block.getLocation().getWorld().playEffect(block.block.getLocation(), Effect.STEP_SOUND,
-                            block.original);
-                    block.block.setType(block.original);
-                    // Make damage/data values (different leaves and such) work.
-                    block.block.setBlockData(block.originalData);
                     blocks.remove(0);
+
+                    // Schedule block placement on the region that owns this location
+                    Bukkit.getRegionScheduler().run(Creepair.this, block.block.getLocation(), scheduledTask -> {
+                        // Don't destroy player repairs.
+                        if (block.block.getLocation().getBlock().getType() != Material.AIR) {
+                            return;
+                        }
+
+                        block.block.getLocation().getWorld().playEffect(block.block.getLocation(), Effect.STEP_SOUND,
+                                block.original);
+                        block.block.setType(block.original);
+                        // Make damage/data values (different leaves and such) work.
+                        block.block.setBlockData(block.originalData);
+                    });
                 }
             }
         }
