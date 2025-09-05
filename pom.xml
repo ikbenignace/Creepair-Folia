@@ -17,6 +17,10 @@
             <id>sk89q-repo</id>
             <url>https://maven.enginehub.org/repo/</url>
          </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
    </repositories>
    <dependencies>
       <dependency>
@@ -24,6 +28,12 @@
          <artifactId>spigot-api</artifactId>
          <version>1.21-R0.1-SNAPSHOT</version>
          <scope>provided</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.github.TechnicallyCoded</groupId>
+         <artifactId>FoliaLib</artifactId>
+         <version>0.4.2</version>
+         <scope>compile</scope>
       </dependency>
       <dependency>
          <groupId>com.sk89q.worldguard</groupId>
@@ -55,6 +65,27 @@
                <source>21</source>
                <target>21</target>
             </configuration>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.4.1</version>
+            <executions>
+               <execution>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>shade</goal>
+                  </goals>
+                  <configuration>
+                     <relocations>
+                        <relocation>
+                           <pattern>com.tcoded.folialib</pattern>
+                           <shadedPattern>im.wma.dev.creepair.folialib</shadedPattern>
+                        </relocation>
+                     </relocations>
+                  </configuration>
+               </execution>
+            </executions>
          </plugin>
       </plugins>
    </build>

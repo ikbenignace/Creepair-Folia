@@ -8,6 +8,7 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
+import com.tcoded.folialib.FoliaLib;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -35,11 +36,15 @@ public class Creepair extends JavaPlugin implements Listener {
     private final List<Tag<Material>> naturalTags = new ArrayList<>();
     private int y;
     private RepairHelper helper;
+    private FoliaLib foliaLib;
 
     private WorldGuardPlugin wg = null;
 
     @Override
     public void onEnable() {
+        // Initialize FoliaLib
+        this.foliaLib = new FoliaLib(this);
+        
         this.saveDefaultConfig();
         if (!this.getConfig().contains("config")) {
             this.getConfig().options().copyDefaults(true);
@@ -51,7 +56,8 @@ public class Creepair extends JavaPlugin implements Listener {
         naturalTags.addAll(getTagList(this.getConfig().getStringList("natural_tags")));
 
         this.helper = new RepairHelper();
-        this.getServer().getScheduler().scheduleSyncRepeatingTask(this, this.helper, 10, 10);
+        // Use FoliaLib's scheduler which works on both Folia and non-Folia servers
+        this.foliaLib.getImpl().runTimerAsync(this.helper, 10, 10);
 
         this.getServer().getPluginManager().registerEvents(this, this);
         // Anonymous implementation of "/creepair" root command.
@@ -324,19 +330,21 @@ public class Creepair extends JavaPlugin implements Listener {
 
                 if (blocks.get(0) != null) {
                     CreepairBlock block = blocks.get(0);
-
-                    // Don't destroy player repairs.
-                    if (block.block.getLocation().getBlock().getType() != Material.AIR) {
-                        blocks.remove(0);
-                        continue;
-                    }
-
-                    block.block.getLocation().getWorld().playEffect(block.block.getLocation(), Effect.STEP_SOUND,
-                            block.original);
-                    block.block.setType(block.original);
-                    // Make damage/data values (different leaves and such) work.
-                    block.block.setBlockData(block.originalData);
                     blocks.remove(0);
+
+                    // Use FoliaLib's region scheduler for thread-safe block placement
+                    foliaLib.getImpl().runAtLocation(block.block.getLocation(), () -> {
+                        // Don't destroy player repairs.
+                        if (block.block.getLocation().getBlock().getType() != Material.AIR) {
+                            return;
+                        }
+
+                        block.block.getLocation().getWorld().playEffect(block.block.getLocation(), Effect.STEP_SOUND,
+                                block.original);
+                        block.block.setType(block.original);
+                        // Make damage/data values (different leaves and such) work.
+                        block.block.setBlockData(block.originalData);
+                    });
                 }
             }
         }
